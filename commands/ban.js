@@ -1,0 +1,28 @@
+const Discord = require('discord.js'),
+    config = require('../config.json')
+
+module.exports = {
+    run: async (message, args) => {
+        if (!message.member.hasPermission('BAN_MEMBERS')) return message.channel.send('Vous n\'avez pas le grade requis pour faire cela soldat!')
+        const member = message.mentions.members.first()
+        if (!member) return message.channel.send('Veuillez mentionner le membre à exécuté !')
+        if (member.id === message.guild.ownerID) return message.channel.send('Vous ne pouvez pas bannir notre créteur tout de même !')
+        if (message.member.roles.highest.comparePositionTo(member.roles.highest) < 1 && message.author.id !== message.guild.ownerID) return message.channel.send('Vous ne pouvez pas éxécuté cette personne !')
+        if (!member.bannable) return message.channel.send('Je ne possède pas la possibilté de faire cela !')
+        const reason = args.slice(1).join(' ') || 'Indiquez la raison de cette décision soldat !'
+        await member.ban({reason})
+        message.channel.send(`${member.user.tag} a été éxécuté !`)
+        message.guild.channels.cache.get(config.logs).send(new Discord.MessageEmbed()
+            .setColor('RANDOM')
+            .setAuthor(`[BAN] ${member.user.tag}`, member.user.displayAvatarURL())
+            .addField('Soldat', member, true)
+            .addField('Par', message.author, true)
+            .addField('Raison:', reason, true))
+    },
+    name: 'ban',
+    guildOnly: true,
+    help: {
+        description: 'Bannir un membre du serveur',
+        syntax: '<@membre> [raison]'
+    }
+}
